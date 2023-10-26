@@ -9,7 +9,6 @@ from torch import cuda
 from transformers import RobertaTokenizer, RobertaForSequenceClassification
 
 gpu = 'cuda:0' if cuda.is_available() else 'cpu'
-gpu
 
 MAX_LEN = 256
 TRAIN_BATCH_SIZE = 8
