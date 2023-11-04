@@ -44,12 +44,8 @@ class BertPredictor:
         b_masked_pos,
         mask_token=True,
         n_top=5,
-        n_units=1,
         n_tokens=[1],
-        fix_multiunit=True,
         beam_size=10,
-        multiunit_lookup=100,
-        max_multiunit=10,
         label=None,
     ):
         # Main function to generate predictions for masked tokens, can generate predictions for both single words and sequences.
@@ -65,10 +61,6 @@ class BertPredictor:
                 b_masked_pos,
                 mask_token=mask_token,
                 n_top=n_top,
-                n_units=n_units,
-                multiunit_lookup=multiunit_lookup,
-                fix_multiunit=fix_multiunit,
-                max_multiunit=max_multiunit,
                 label=label,
             )
 
@@ -82,12 +74,8 @@ class BertPredictor:
                 b_masked_pos,
                 mask_token=mask_token,
                 n_top=n_top,
-                n_units=n_units,
                 seq_len=n_t,
-                multiunit_lookup=multiunit_lookup,
-                fix_multiunit=fix_multiunit,
                 beam_size=beam_size,
-                max_multiunit=max_multiunit,
                 label=label,
             )
 
@@ -210,10 +198,6 @@ class BertPredictor:
         masked_position,
         mask_token,
         n_top,
-        n_units,
-        fix_multiunit,
-        multiunit_lookup,
-        max_multiunit,
         label=None,
     ):
         # Predict the top tokens for a single masked word (unit), may involve multiple subword tokens.
@@ -226,40 +210,7 @@ class BertPredictor:
         final_scores = []
 
         for j in range(len(pred_tokens)):
-            # If n_units > 1, it considers multiple units for the prediction.
-            if n_units > 1:
-                pred_tokens[j] = list(reversed(pred_tokens[j][:multiunit_lookup]))
-                scores[j] = list(reversed(scores[j][:multiunit_lookup]))
-
-                # Generate multiple unit tokens for the masked position
-                seq_list = self.generate_multiunit_token(
-                    masked_position[j],
-                    bpe_tokens[j],
-                    n_top=multiunit_lookup,
-                    n_units=n_units,
-                    label=label,
-                )
-
-                for seq in seq_list[:max_multiunit]:
-                    seq_pred, seq_scores = seq
-                    multiunit_token = "_".join(seq_pred)
-
-                    # Optionally fix the format of multiunit tokens
-                    if fix_multiunit:
-                        multiunit_token = multiunit_token.replace("#", "")
-                        multiunit_token = multiunit_token.replace("_", "")
-
-                    # Calculate the average score for the multiunit token
-                    multiunit_score = self.mean(seq_scores)
-
-                    # Insert the multiunit token and its score into the predictions
-                    ind = bisect.bisect(scores[j], multiunit_score)
-                    pred_tokens[j].insert(ind, multiunit_token)
-                    scores[j].insert(ind, multiunit_score)
-
-                pred_tokens[j] = list(reversed(pred_tokens[j]))
-                scores[j] = list(reversed(scores[j]))
-
+            
             final_pred_tokens.append(pred_tokens[j][:n_top])
             final_scores.append(scores[j][:n_top])
 
@@ -334,10 +285,6 @@ class BertPredictor:
         n_top,
         seq_len,
         beam_size,
-        n_units,
-        fix_multiunit,
-        multiunit_lookup,
-        max_multiunit,
         label=None,
     ):
         bpe_tokens = copy.deepcopy(bpe_tokens)
@@ -350,7 +297,7 @@ class BertPredictor:
         # Predict a sequence of tokens for a masked position using beam search.
         gen_scores = []
         gen_tokens = []
-        for seq_num in range(seq_len):
+        for _ in range(seq_len):
             gen_scores_seq = [
                 [0.0 for __ in range(beam_size)] for _ in range(batch_size)
             ]
@@ -365,10 +312,6 @@ class BertPredictor:
                     new_mask,
                     mask_token=True,
                     n_top=n_top,
-                    n_units=n_units,
-                    fix_multiunit=fix_multiunit,
-                    multiunit_lookup=multiunit_lookup,
-                    max_multiunit=max_multiunit,
                     label=label,
                 )
 

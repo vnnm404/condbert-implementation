@@ -160,7 +160,6 @@ class CondBert:
                 mask_pos,
                 n_tokens=list(n_tokens),
                 n_top=n_top,
-                fix_multiunit=False,
                 mask_token=mask_token,
                 label=label,
             )
