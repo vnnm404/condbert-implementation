@@ -29,6 +29,7 @@ def clean_text(text):
     text = text.replace('\n', ' ')  # replace newline characters with space
     text = text.lower()  # convert to lowercase
     text = text.translate(str.maketrans('', '', string.punctuation))  # remove punctuation
+    
     return text
 
 all_sentences = []

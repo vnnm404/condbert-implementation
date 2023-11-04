@@ -28,13 +28,13 @@ This script needs to be only run once
 '''
 
 # Creating vocab directory
-vocab_dir = "../vocab/"
+vocab_dir = "../vocab_2/"
 if not os.path.exists(vocab_dir):
     os.makedirs(vocab_dir)
 
 # Locations of input files
-train_toxic_path = "../data/train_toxic.txt"
-train_normal_path ="../data/train_normal.txt"
+train_toxic_path = "../data/train_toxic_2.txt"
+train_normal_path ="../data/train_normal_2.txt"
 
 # Reading the toxic and the normal txt file
 with open(train_toxic_path, 'r') as tox_corpus, open(train_normal_path, 'r') as norm_corpus:
